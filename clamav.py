@@ -40,13 +40,6 @@ from common import create_dir
 
 RE_SEARCH_DIR = r"SEARCH_DIR\(\"=([A-z0-9\/\-_]*)\"\)"
 
-
-def current_library_search_path():
-    ld_verbose = subprocess.check_output(["ld", "--verbose"]).decode("utf-8")
-    rd_ld = re.compile(RE_SEARCH_DIR)
-    return rd_ld.findall(ld_verbose)
-
-
 def update_defs_from_s3(s3_client, bucket, prefix):
     create_dir(AV_DEFINITION_PATH)
     to_download = {}
@@ -112,7 +105,7 @@ def update_defs_from_freshclam(path, library_path=""):
     fc_env = os.environ.copy()
     if library_path:
         fc_env["LD_LIBRARY_PATH"] = "%s:%s" % (
-            ":".join(current_library_search_path()),
+            fc_env["LD_LIBRARY_PATH"],
             CLAMAVLIB_PATH,
         )
     print("Starting freshclam with defs in %s." % path)
@@ -194,7 +187,8 @@ def scan_file(path):
         stdout=subprocess.PIPE,
         env=av_env,
     )
-    output = av_proc.communicate()[0].decode()
+    # Compressed files named in Japanese may cause errors. Therefore, use the "ignore" option.
+    output = av_proc.communicate()[0].decode(errors="ignore")
     print("clamscan output:\n%s" % output)
 
     # Turn the output into a data source we can read
