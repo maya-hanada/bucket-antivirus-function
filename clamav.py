@@ -15,9 +15,9 @@
 
 import datetime
 import hashlib
+from ntpath import join
 import os
 import pwd
-import re
 import subprocess
 
 import boto3
@@ -35,6 +35,8 @@ from common import AV_STATUS_INFECTED
 from common import CLAMAVLIB_PATH
 from common import CLAMSCAN_PATH
 from common import FRESHCLAM_PATH
+from common import AV_SCAN_MAX_FILESIZE
+from common import AV_SCAN_MAX_SCANSIZE
 from common import create_dir
 
 
@@ -180,9 +182,19 @@ def scan_output_to_json(output):
 def scan_file(path):
     av_env = os.environ.copy()
     av_env["LD_LIBRARY_PATH"] = CLAMAVLIB_PATH
+
+    # Make commands
+    exec_command =  [CLAMSCAN_PATH, "-v", "-a", "--stdout", "-d", AV_DEFINITION_PATH]
+    if AV_SCAN_MAX_FILESIZE is not None:
+        exec_command.extend(["--max-filesize", AV_SCAN_MAX_FILESIZE])
+    if AV_SCAN_MAX_SCANSIZE is not None:
+        exec_command.extend(["--max-scansize", AV_SCAN_MAX_SCANSIZE])
+    exec_command.extend([path])
+
     print("Starting clamscan of %s." % path)
+    print("command : %s " % ' '.join(exec_command))
     av_proc = subprocess.Popen(
-        [CLAMSCAN_PATH, "-v", "-a", "--stdout", "-d", AV_DEFINITION_PATH, path],
+        exec_command,
         stderr=subprocess.STDOUT,
         stdout=subprocess.PIPE,
         env=av_env,
