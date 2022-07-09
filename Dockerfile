@@ -4,11 +4,13 @@ FROM amazonlinux:2
 RUN mkdir -p /opt/app
 RUN mkdir -p /opt/app/build
 RUN mkdir -p /opt/app/bin/
+RUN mkdir -p /opt/app/tmp/
 
 # Copy in the lambda source
 WORKDIR /opt/app
 COPY ./*.py /opt/app/
 COPY requirements.txt /opt/app/requirements.txt
+COPY installed_lib_list.txt /opt/app/tmp/installed_lib_list.txt
 
 # Install packages
 RUN yum update -y
@@ -38,6 +40,7 @@ RUN rpm2cpio libtool-ltdl* | cpio -idmv
 RUN cp /tmp/usr/bin/clamscan /tmp/usr/bin/freshclam /tmp/usr/lib64/* /opt/app/bin/
 RUN find /usr/lib64/* -type f -maxdepth 0 -exec cp {} /opt/app/bin/ \;
 RUN find /usr/lib64/* -type l -maxdepth 0 -exec cp {} /opt/app/bin/ \;
+RUN cat /opt/app/tmp/installed_lib_list.txt | xargs rm -v -f
 
 # Fix the freshclam.conf settings
 RUN echo "DatabaseMirror database.clamav.net" > /opt/app/bin/freshclam.conf
