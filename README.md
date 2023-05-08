@@ -5,10 +5,13 @@ This is a fork that:
 - supports Python 3.8
 - uses uptodate versions of the libraries
 - can set the maximum file size to be scanned via the environment variable AV_SCAN_MAX_FILESIZE and AV_SCAN_MAX_SCANSIZE
+- Functions related to Datadog are not maintained
 
-[![CircleCI](https://circleci.com/gh/upsidetravel/bucket-antivirus-function.svg?style=svg)](https://circleci.com/gh/upsidetravel/bucket-antivirus-function)
+このリポジトリはFork元が更新を停止したため個人的にメンテナンスをしているものです。  
+AWSのPythonバージョンアップに伴う修正と、ClamAVの設定項目を増やすことが主な関心事です。  
+DataDogは詳しくないためメンテナンス予定はありません。  
 
-Scan new objects added to any s3 bucket using AWS Lambda. [more details in this post](https://engineering.upside.com/s3-antivirus-scanning-with-lambda-and-clamav-7d33f9c5092e)
+Scan new objects added to any s3 bucket using AWS Lambda.
 
 ## Features
 
@@ -87,31 +90,36 @@ can cause a continuous loop of scanning if improperly configured.
 Runtime configuration is accomplished using environment variables.  See
 the table below for reference.
 
-| Variable | Description | Default | Required |
-| --- | --- | --- | --- |
-| AV_DEFINITION_S3_BUCKET | Bucket containing antivirus definition files |  | Yes |
-| AV_DEFINITION_S3_PREFIX | Prefix for antivirus definition files | clamav_defs | No |
-| AV_DEFINITION_PATH | Path containing files at runtime | /tmp/clamav_defs | No |
-| AV_SCAN_START_SNS_ARN | SNS topic ARN to publish notification about start of scan | | No |
-| AV_SCAN_START_METADATA | The tag/metadata indicating the start of the scan | av-scan-start | No |
-| AV_SIGNATURE_METADATA | The tag/metadata name representing file's AV type | av-signature | No |
-| AV_STATUS_CLEAN | The value assigned to clean items inside of tags/metadata | CLEAN | No |
-| AV_STATUS_INFECTED | The value assigned to clean items inside of tags/metadata | INFECTED | No |
-| AV_STATUS_METADATA | The tag/metadata name representing file's AV status | av-status | No |
-| AV_STATUS_SNS_ARN | SNS topic ARN to publish scan results (optional) | | No |
-| AV_STATUS_SNS_PUBLISH_CLEAN | Publish AV_STATUS_CLEAN results to AV_STATUS_SNS_ARN | True | No |
-| AV_STATUS_SNS_PUBLISH_INFECTED | Publish AV_STATUS_INFECTED results to AV_STATUS_SNS_ARN | True | No |
-| AV_TIMESTAMP_METADATA | The tag/metadata name representing file's scan time | av-timestamp | No |
-| CLAMAVLIB_PATH | Path to ClamAV library files | ./bin | No |
-| CLAMSCAN_PATH | Path to ClamAV clamscan binary | ./bin/clamscan | No |
-| FRESHCLAM_PATH | Path to ClamAV freshclam binary | ./bin/freshclam | No |
-| DATADOG_API_KEY | API Key for pushing metrics to DataDog (optional) | | No |
-| AV_PROCESS_ORIGINAL_VERSION_ONLY | Controls that only original version of an S3 key is processed (if bucket versioning is enabled) | False | No |
-| AV_DELETE_INFECTED_FILES | Controls whether infected files should be automatically deleted | False | No |
-| EVENT_SOURCE | The source of antivirus scan event "S3" or "SNS" (optional) | S3 | No |
-| S3_ENDPOINT | The Endpoint to use when interacting wth S3 | None | No |
-| SNS_ENDPOINT | The Endpoint to use when interacting wth SNS | None | No |
-| LAMBDA_ENDPOINT | The Endpoint to use when interacting wth Lambda | None | No |
+| Variable                         | Description                                                                                     | Default           | Required |
+| -------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------- | -------- |
+| AV_DEFINITION_S3_BUCKET          | Bucket containing antivirus definition files                                                    |                   | Yes      |
+| AV_DEFINITION_S3_PREFIX          | Prefix for antivirus definition files                                                           | clamav_defs       | No       |
+| AV_DEFINITION_PATH               | Path containing files at runtime                                                                | /tmp/clamav_defs  | No       |
+| AV_SCAN_START_SNS_ARN            | SNS topic ARN to publish notification about start of scan                                       |                   | No       |
+| AV_SCAN_START_METADATA           | The tag/metadata indicating the start of the scan                                               | av-scan-start     | No       |
+| AV_SIGNATURE_METADATA            | The tag/metadata name representing file's AV type                                               | av-signature      | No       |
+| AV_STATUS_CLEAN                  | The value assigned to clean items inside of tags/metadata                                       | CLEAN             | No       |
+| AV_STATUS_INFECTED               | The value assigned to clean items inside of tags/metadata                                       | INFECTED          | No       |
+| AV_STATUS_METADATA               | The tag/metadata name representing file's AV status                                             | av-status         | No       |
+| AV_STATUS_SNS_ARN                | SNS topic ARN to publish scan results (optional)                                                |                   | No       |
+| AV_STATUS_SNS_PUBLISH_CLEAN      | Publish AV_STATUS_CLEAN results to AV_STATUS_SNS_ARN                                            | True              | No       |
+| AV_STATUS_SNS_PUBLISH_INFECTED   | Publish AV_STATUS_INFECTED results to AV_STATUS_SNS_ARN                                         | True              | No       |
+| AV_TIMESTAMP_METADATA            | The tag/metadata name representing file's scan time                                             | av-timestamp      | No       |
+| CLAMAVLIB_PATH                   | Path to ClamAV library files                                                                    | ./bin             | No       |
+| CLAMSCAN_PATH                    | Path to ClamAV clamscan binary                                                                  | ./bin/clamscan    | No       |
+| FRESHCLAM_PATH                   | Path to ClamAV freshclam binary                                                                 | ./bin/freshclam   | No       |
+| DATADOG_API_KEY                  | API Key for pushing metrics to DataDog (optional)                                               |                   | No       |
+| AV_PROCESS_ORIGINAL_VERSION_ONLY | Controls that only original version of an S3 key is processed (if bucket versioning is enabled) | False             | No       |
+| AV_DELETE_INFECTED_FILES         | Controls whether infected files should be automatically deleted                                 | False             | No       |
+| EVENT_SOURCE                     | The source of antivirus scan event "S3" or "SNS" (optional)                                     | S3                | No       |
+| S3_ENDPOINT                      | The Endpoint to use when interacting wth S3                                                     | None              | No       |
+| SNS_ENDPOINT                     | The Endpoint to use when interacting wth SNS                                                    | None              | No       |
+| LAMBDA_ENDPOINT                  | The Endpoint to use when interacting wth Lambda                                                 | None              | No       |
+| AV_SCAN_MAX_FILESIZE             | Files larger than this will be skipped and assumed clean(ClamAV args)                           | Depends on ClamAV | No       |
+| AV_SCAN_MAX_SCANSIZE             | The maximum amount of data to scan for each container file(ClamAV args)                         | Depends on ClamAV | No       |
+
+2023/05/08 AV_SCAN_MAX_FILESIZE, AV_SCAN_MAX_SCANSIZE were added.  
+設定項目についてはこちらを参照[ClamAV - ArchWiki](https://wiki.archlinux.jp/index.php/ClamAV#.E3.82.A6.E3.82.A4.E3.83.AB.E3.82.B9.E3.81.AE.E3.82.B9.E3.82.AD.E3.83.A3.E3.83.B3)
 
 ## S3 Bucket Policy Examples
 
