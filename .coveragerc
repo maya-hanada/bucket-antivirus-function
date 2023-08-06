@@ -5,4 +5,5 @@ data_file = .coverage
 omit =
   */python?.?/*
   */site-packages/nose/*
+  *test_*.py
 show_missing = true

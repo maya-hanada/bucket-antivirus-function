@@ -15,7 +15,6 @@
 AMZ_LINUX_VERSION:=2
 current_dir := $(shell pwd)
 container_dir := /opt/app
-circleci := ${CIRCLECI}
 
 .PHONY: help
 help:  ## Print the help documentation
@@ -29,8 +28,8 @@ clean:  ## Clean build artifacts
 	rm -rf build/
 	rm -rf tmp/
 	rm -f .coverage
-	find ./ -type d -name '__pycache__' -delete
-	find ./ -type f -name '*.pyc' -delete
+	find ./ -type d -name '__pycache__' -exec rm -rf {} +
+	find ./ -type f -name '*.pyc' -exec rm -rf {} +
 
 .PHONY: archive
 archive: clean  ## Create the archive for AWS lambda
@@ -51,11 +50,11 @@ pre_commit_tests: ## Run pre-commit tests
 
 .PHONY: test
 test: clean  ## Run python tests
-	nosetests
+	nose2
 
 .PHONY: coverage
 coverage: clean  ## Run python tests with coverage
-	nosetests --with-coverage
+	nose2 --with-coverage
 
 .PHONY: scan
 scan: ./build/lambda.zip ## Run scan function locally
