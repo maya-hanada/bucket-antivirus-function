@@ -2,14 +2,22 @@
 
 This is a fork that:
 
-- supports Python 3.8
+- supports Python 3.10
 - uses uptodate versions of the libraries
 - can set the maximum file size to be scanned via the environment variable AV_SCAN_MAX_FILESIZE and AV_SCAN_MAX_SCANSIZE
 - Functions related to Datadog are not maintained
 
 このリポジトリはFork元が更新を停止したため個人的にメンテナンスをしているものです。  
 AWSのPythonバージョンアップに伴う修正と、ClamAVの設定項目を増やすことが主な関心事です。  
-DataDogは詳しくないためメンテナンス予定はありません。  
+DataDog関連機能は詳しくないためメンテナンス予定はありません。  
+もしなにかご要望等あればX(Twitter)のDMにください。対応するかもしれません。  
+※AWS Lambdaのエフェメラルストレージ容量の制約により大容量ファイルのスキャンには向いていません。  
+
+下記のMakeコマンドについては現在メンテナンスしていません。  
+- pre_commit_install
+- pre_commit_tests
+- scan
+- update
 
 Scan new objects added to any s3 bucket using AWS Lambda.
 
