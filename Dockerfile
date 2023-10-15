@@ -1,4 +1,6 @@
-FROM public.ecr.aws/lambda/python:3.10
+FROM public.ecr.aws/lambda/python:3.11
+
+RUN cat /etc/system-release
 
 # Set up working directories
 RUN mkdir -p /opt/app
@@ -6,22 +8,47 @@ RUN mkdir -p /opt/app/build
 RUN mkdir -p /opt/app/bin/
 RUN mkdir -p /opt/app/tmp/
 
-# Get lib list
-# RUN ls /usr/lib64 > /opt/app/tmp/lib.txt
-
 # Install packages
 RUN yum update -y
+RUN yum install -y yum-utils cpio
 RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-RUN yum install -y yum-utils epel-release
 
 # Install libraries we need to run in lambda
-RUN yum install -y clamav clamav-lib clamav-update bzip2 zlib libxml2 libmspack check libcurl
-RUN cp /usr/bin/clamscan /usr/bin/freshclam /opt/app/bin/
-RUN yum remove -y yum-utils epel-release
-RUN find /usr/lib64/* -type f -maxdepth 0 -exec cp {} /opt/app/bin/ \;
-RUN find /usr/lib64/* -type l -maxdepth 0 -exec cp {} /opt/app/bin/ \;
-RUN find /usr/lib/* -type f -maxdepth 0 -exec cp {} /opt/app/bin/ \;
-RUN find /usr/lib/* -type l -maxdepth 0 -exec cp {} /opt/app/bin/ \;
+WORKDIR /tmp
+RUN yumdownloader -x \*i686 --archlist=x86_64,aarch64 \
+    clamav clamav-lib clamav-update \
+    bzip2-libs json-c libcurl\
+    libidn2 libnghttp2 libprelude\
+    libssh2 libtool-ltdl libxml2\
+    openldap pcre2 \
+    xz-libs gnutls nettle \
+    libunistring cyrus-sasl-lib nss
+
+RUN rpm2cpio clamav-0*.rpm | cpio -idmv
+RUN rpm2cpio clamav-lib*.rpm | cpio -idmv
+RUN rpm2cpio clamav-update*.rpm | cpio -idmv
+RUN rpm2cpio bzip2-libs*.rpm | cpio -idmv
+RUN rpm2cpio json-c*.rpm | cpio -idmv
+RUN rpm2cpio libcurl*.rpm | cpio -idmv
+RUN rpm2cpio libidn2*.rpm | cpio -idmv
+RUN rpm2cpio libnghttp2*.rpm | cpio -idmv
+RUN rpm2cpio libprelude*.rpm | cpio -idmv
+RUN rpm2cpio libssh2*.rpm | cpio -idmv
+RUN rpm2cpio libtool-ltdl*.rpm | cpio -idmv
+RUN rpm2cpio libxml2*.rpm | cpio -idmv
+RUN rpm2cpio openldap*.rpm | cpio -idmv
+RUN rpm2cpio pcre2*.rpm | cpio -idmv
+
+RUN rpm2cpio xz-libs*.rpm | cpio -idmv
+RUN rpm2cpio gnutls*.rpm | cpio -idmv
+RUN rpm2cpio nettle*.rpm | cpio -idmv
+RUN rpm2cpio libunistring*.rpm | cpio -idmv
+RUN rpm2cpio cyrus-sasl-lib*.rpm | cpio -idmv
+RUN rpm2cpio nss*.rpm | cpio -idmv
+
+# Copy over the binaries and libraries
+WORKDIR /tmp
+RUN cp -rf /tmp/usr/bin/clamscan /tmp/usr/bin/freshclam /tmp/usr/lib64/* /opt/app/bin/
 
 # Fix the freshclam.conf settings
 RUN echo "DatabaseMirror database.clamav.net" > /opt/app/bin/freshclam.conf
@@ -37,7 +64,5 @@ RUN rm -rf /root/.cache/pip
 # Create the zip file
 RUN yum install -y zip
 RUN zip -r9 /opt/app/build/lambda.zip *.py bin
-COPY installed_lib_list.txt /opt/app/tmp/installed_lib_list.txt
-RUN cat /opt/app/tmp/installed_lib_list.txt | xargs -I '{}' zip --delete /opt/app/build/lambda.zip bin/{} ; exit 0
 WORKDIR /opt/app/site-packages
 RUN zip -r9 /opt/app/build/lambda.zip *
